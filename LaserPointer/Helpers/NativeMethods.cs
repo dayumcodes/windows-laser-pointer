@@ -13,6 +13,7 @@ namespace LaserPointer.Helpers
         public const int WS_EX_TRANSPARENT = 0x20;
         public const int WS_EX_TOPMOST = 0x8;
         public const int WS_EX_NOACTIVATE = 0x8000000;
+        public const int WS_EX_NOREDIRECTIONBITMAP = 0x00200000; // Disable WinUI 3 redirection bitmap for transparency
 
         // Window positioning
         public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
@@ -21,6 +22,7 @@ namespace LaserPointer.Helpers
         public const uint SWP_NOSIZE = 0x0001;
         public const uint SWP_NOACTIVATE = 0x0010;
         public const uint SWP_SHOWWINDOW = 0x0040;
+        public const uint SWP_FRAMECHANGED = 0x0020; // Force window to recalculate frame after style change
 
         // Mouse hook
         public const int WH_MOUSE_LL = 14;
@@ -83,6 +85,9 @@ namespace LaserPointer.Helpers
 
         [DllImport("kernel32.dll")]
         public static extern IntPtr GetModuleHandle(string lpModuleName);
+        
+        [DllImport("kernel32.dll")]
+        public static extern uint GetLastError();
 
         [DllImport("user32.dll")]
         public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -92,6 +97,29 @@ namespace LaserPointer.Helpers
 
         [DllImport("user32.dll")]
         public static extern int GetSystemMetrics(int nIndex);
+        
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowLong(IntPtr hWnd, int nIndex);
+        
+        [DllImport("user32.dll")]
+        public static extern bool IsWindow(IntPtr hWnd);
+        
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hWnd);
+        
+        [DllImport("user32.dll")]
+        public static extern bool ScreenToClient(IntPtr hWnd, ref POINT lpPoint);
+        
+        [DllImport("user32.dll")]
+        public static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
+        
+        public const uint LWA_ALPHA = 0x2;
+        public const uint LWA_COLORKEY = 0x1;
+        
+        public const int GWL_STYLE = -16;
+        
+        [DllImport("user32.dll")]
+        public static extern int GetDpiForWindow(IntPtr hwnd);
 
         public const int SM_CXSCREEN = 0;
         public const int SM_CYSCREEN = 1;
@@ -99,6 +127,39 @@ namespace LaserPointer.Helpers
         public const int SM_YVIRTUALSCREEN = 77;
         public const int SM_CXVIRTUALSCREEN = 78;
         public const int SM_CYVIRTUALSCREEN = 79;
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        public const int SW_HIDE = 0;
+        public const int SW_SHOW = 5;
+
+        // DWM (Desktop Window Manager) functions for transparency
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmExtendFrameIntoClientArea(IntPtr hwnd, ref MARGINS pMarInset);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MARGINS
+        {
+            public int cxLeftWidth;
+            public int cxRightWidth;
+            public int cyTopHeight;
+            public int cyBottomHeight;
+        }
+
+        public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        public const int DWMWA_MICA_EFFECT = 1029;
+        public const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+        public const int DWMWA_BORDER_COLOR = 34;
+        public const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+        public const int DWMWA_NCRENDERING_POLICY = 2;
+        
+        // For transparency, we need to set backdrop type to transparent
+        public const int DWM_SYSTEMBACKDROP_TYPE_NONE = 1; // Transparent backdrop
+        public const int DWMNCRP_DISABLED = 1; // Disable non-client area rendering
 
         public delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
     }

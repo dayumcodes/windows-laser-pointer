@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Dispatching;
 using LaserPointer.Models;
 using Windows.UI;
 using Windows.Foundation;
@@ -13,7 +14,7 @@ namespace LaserPointer.Controls
     public sealed partial class LaserCanvas : UserControl
     {
         private List<LaserStroke> _activeStrokes = new List<LaserStroke>();
-        private Windows.UI.Xaml.DispatcherTimer _fadeTimer;
+        private DispatcherQueueTimer _fadeTimer;
         private LaserStroke? _currentStroke;
         private Point? _lastPoint;
         private double _fadeDurationSeconds = 2.0;
@@ -26,10 +27,9 @@ namespace LaserPointer.Controls
 
         private void InitializeTimer()
         {
-            _fadeTimer = new Windows.UI.Xaml.DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(16) // ~60fps
-            };
+            var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+            _fadeTimer = dispatcherQueue.CreateTimer();
+            _fadeTimer.Interval = TimeSpan.FromMilliseconds(16); // ~60fps
             _fadeTimer.Tick += OnFadeTick;
             _fadeTimer.Start();
         }

@@ -7,6 +7,7 @@ namespace LaserPointer.Models
         public float LineThickness { get; set; } = 3.0f;
         public string HotkeyModifiers { get; set; } = "Control+Shift";
         public string HotkeyKey { get; set; } = "L";
+        public string WindowBackgroundColor { get; set; } = "Transparent";
     }
 }
 
