@@ -2,7 +2,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.IO;
 using Microsoft.Windows.ApplicationModel.DynamicDependency;
+using Windows.ApplicationModel;
 
 namespace LaserPointer
 {
@@ -12,69 +14,35 @@ namespace LaserPointer
         [ModuleInitializer]
         internal static void Initialize()
         {
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"BootstrapInitializer.cs:16\",\"message\":\"ModuleInitializer entry\",\"data\":{{\"exePath\":\"{AppDomain.CurrentDomain.BaseDirectory}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"H1\"}}\n"); } catch { }
+            // #endregion
             LogDebug("=== Module Initializer Started ===");
             LogDebug("Initializing Windows App SDK bootstrapper BEFORE any other code runs...");
             
-            try
-            {
-                // Initialize Windows App SDK bootstrapper for unpackaged deployment
-                // Version 1.5 = 0x00010005
-                LogDebug("Calling Bootstrap.TryInitialize(0x00010005)...");
-                int hresult;
-                bool success = Bootstrap.TryInitialize(0x00010005, out hresult);
+            // #region agent log
+            try { 
+                var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                var bootstrapDll = Path.Combine(exeDir, "Microsoft.WindowsAppRuntime.Bootstrap.dll");
+                var bootstrapDllExists = File.Exists(bootstrapDll);
+                var dlls = Directory.GetFiles(exeDir, "*.dll").Length;
+                var isTempDir = exeDir.Contains(@"\Temp\") || exeDir.Contains(@"\.net\");
                 
-                if (success)
-                {
-                    LogDebug($"✓ Bootstrap initialization SUCCESS (HRESULT: 0x{hresult:X8})");
-                }
-                else
-                {
-                    string errorMsg = $"✗ Bootstrap initialization FAILED with HRESULT: 0x{hresult:X8}";
-                    LogDebug(errorMsg);
-                    
-                    // Decode common HRESULT errors
-                    string hresultInfo = DecodeHResult(hresult);
-                    LogDebug($"HRESULT details: {hresultInfo}");
-                    
-                    // Show error message for debugging using Win32 MessageBox
-                    string message = $"Windows App SDK Bootstrap failed!\n\n" +
-                        $"HRESULT: 0x{hresult:X8}\n" +
-                        $"Details: {hresultInfo}\n\n" +
-                        $"This usually means:\n" +
-                        $"1. Windows App Runtime 1.5 is not installed\n" +
-                        $"2. The installed version is incompatible\n" +
-                        $"3. The bootstrapper DLL is missing\n\n" +
-                        $"Check the Output window (Debug) for more details.";
-                    
-                    MessageBox(IntPtr.Zero, message, "Bootstrap Initialization Error", 0x10 | 0x0);
-                }
+                // Check installed runtime packages
+                var runtimeInfo = GetInstalledRuntimeInfo();
+                
+                File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"BootstrapInitializer.cs:25\",\"message\":\"Before Bootstrap.TryInitialize - checking DLLs and runtime\",\"data\":{{\"exeDir\":\"{exeDir}\",\"bootstrapDllExists\":{bootstrapDllExists.ToString().ToLower()},\"totalDlls\":{dlls},\"isTempDir\":{isTempDir.ToString().ToLower()},\"runtimeInstalled\":{runtimeInfo.installed.ToString().ToLower()},\"runtimePackages\":\"{runtimeInfo.packages}\",\"runtimeVersions\":\"{runtimeInfo.versions}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run4\",\"hypothesisId\":\"H1\"}}\n"); 
+            } catch (Exception ex) { 
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"BootstrapInitializer.cs:25\",\"message\":\"Error checking DLLs\",\"data\":{{\"error\":\"{ex.Message}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run4\",\"hypothesisId\":\"H1\"}}\n"); } catch { }
             }
-            catch (DllNotFoundException dllEx)
-            {
-                string errorMsg = $"DLL NOT FOUND: {dllEx.Message}";
-                LogDebug(errorMsg);
-                LogDebug($"Stack trace: {dllEx.StackTrace}");
-                
-                string message = $"Bootstrap DLL not found!\n\n" +
-                    $"Message: {dllEx.Message}\n\n" +
-                    $"This means the Microsoft.WindowsAppRuntime.Bootstrap.dll is missing.\n" +
-                    $"Check the Output window for full details.";
-                
-                MessageBox(IntPtr.Zero, message, "Bootstrap DLL Missing", 0x10 | 0x0);
-            }
-            catch (Exception ex)
-            {
-                string errorMsg = $"Bootstrap initialization EXCEPTION: {ex.GetType().Name} - {ex.Message}";
-                LogDebug(errorMsg);
-                LogDebug($"Stack trace: {ex.StackTrace}");
-                
-                string message = $"Exception during bootstrap initialization!\n\n" +
-                    $"Type: {ex.GetType().Name}\n" +
-                    $"Message: {ex.Message}\n\n" +
-                    $"Check the Output window (Debug) for full details.";
-                
-                MessageBox(IntPtr.Zero, message, "Bootstrap Initialization Exception", 0x10 | 0x0);
-            }
+            // #endregion
+            
+            // SKIP initialization in ModuleInitializer - it's failing with SEHException
+            // Initialization will be done in Program.Main instead
+            LogDebug("Skipping bootstrap initialization in ModuleInitializer (will be done in Program.Main)");
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"BootstrapInitializer.cs:40\",\"message\":\"Skipping initialization in ModuleInitializer\",\"data\":{{\"reason\":\"Will initialize in Program.Main instead\"}},\"sessionId\":\"debug-session\",\"runId\":\"run6\",\"hypothesisId\":\"H7\"}}\n"); } catch { }
+            // #endregion
             
             LogDebug("=== Module Initializer Completed ===");
         }
@@ -103,6 +71,72 @@ namespace LaserPointer
                 Console.WriteLine(logMessage);
             }
             catch { }
+        }
+        
+        private static (bool installed, string packages, string versions) GetInstalledRuntimeInfo()
+        {
+            try
+            {
+                // Check if Windows App Runtime package is installed using PowerShell
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-Command \"Get-AppxPackage -Name Microsoft.WindowsAppRuntime* | Select-Object Name, Version, Architecture | ConvertTo-Json -Compress\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+                
+                using (var process = Process.Start(startInfo))
+                {
+                    if (process != null)
+                    {
+                        process.WaitForExit(5000); // 5 second timeout
+                        string output = process.StandardOutput.ReadToEnd().Trim();
+                        string error = process.StandardError.ReadToEnd().Trim();
+                        
+                        if (!string.IsNullOrEmpty(output) && !output.StartsWith("Get-AppxPackage"))
+                        {
+                            // Parse JSON output to get package names and versions
+                            var packages = output;
+                            var versions = ExtractVersions(output);
+                            return (true, packages, versions);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}", "");
+            }
+            return (false, "No packages found", "");
+        }
+        
+        private static string ExtractVersions(string json)
+        {
+            try
+            {
+                // Simple extraction - look for Version patterns in JSON
+                var versions = new System.Collections.Generic.List<string>();
+                var parts = json.Split(new[] { "\"Version\"" }, StringSplitOptions.None);
+                for (int i = 1; i < parts.Length && i < 4; i++)
+                {
+                    var versionPart = parts[i].Split('"')[1];
+                    if (!string.IsNullOrEmpty(versionPart))
+                        versions.Add(versionPart);
+                }
+                return string.Join(", ", versions);
+            }
+            catch
+            {
+                return "Unable to parse";
+            }
+        }
+        
+        private static bool CheckWindowsAppRuntimeInstalled()
+        {
+            return GetInstalledRuntimeInfo().installed;
         }
         
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]

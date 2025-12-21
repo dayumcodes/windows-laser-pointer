@@ -1,8 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.IO;
+using System.Linq;
 // DO NOT import Microsoft.UI.Xaml here - it will load the DLL before bootstrap!
 using Microsoft.Windows.ApplicationModel.DynamicDependency;
+using Windows.ApplicationModel;
 
 namespace LaserPointer
 {
@@ -19,10 +22,32 @@ namespace LaserPointer
             try
             {
                 // Initialize Windows App SDK bootstrapper for unpackaged deployment
-                // Version 1.5 = 0x00010005
-                LogDebug("Calling Bootstrap.TryInitialize(0x00010005)...");
+                // Try with explicit PackageVersion first (more reliable with multiple versions installed)
+                LogDebug("Calling Bootstrap.TryInitialize with explicit PackageVersion...");
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"Program.cs:23\",\"message\":\"About to call Bootstrap.TryInitialize in Program.Main\",\"data\":{{\"version\":\"0x00010005\"}},\"sessionId\":\"debug-session\",\"runId\":\"run6\",\"hypothesisId\":\"H7\"}}\n"); } catch { }
+                // #endregion
+                
                 int hresult;
-                bool success = Bootstrap.TryInitialize(0x00010005, out hresult);
+                bool success = false;
+                
+                // Try with explicit PackageVersion (more specific, handles multiple versions better)
+                try
+                {
+                    var minVersion = new Windows.ApplicationModel.PackageVersion(0, 0, 0, 0);
+                    success = Bootstrap.TryInitialize(0x00010005, "", minVersion, out hresult);
+                    // #region agent log
+                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"Program.cs:31\",\"message\":\"Bootstrap.TryInitialize with PackageVersion returned\",\"data\":{{\"success\":{success.ToString().ToLower()},\"hresult\":\"0x{hresult:X8}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run6\",\"hypothesisId\":\"H7\"}}\n"); } catch { }
+                    // #endregion
+                }
+                catch
+                {
+                    // Fallback to simple overload if PackageVersion approach fails
+                    success = Bootstrap.TryInitialize(0x00010005, out hresult);
+                    // #region agent log
+                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"Program.cs:36\",\"message\":\"Bootstrap.TryInitialize simple overload returned\",\"data\":{{\"success\":{success.ToString().ToLower()},\"hresult\":\"0x{hresult:X8}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run6\",\"hypothesisId\":\"H7\"}}\n"); } catch { }
+                    // #endregion
+                }
                 
                 if (success)
                 {
@@ -69,6 +94,11 @@ namespace LaserPointer
             }
             catch (Exception ex)
             {
+                // #region agent log
+                try { 
+                    File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"Program.cs:71\",\"message\":\"SEHException caught in Program.Main\",\"data\":{{\"type\":\"{ex.GetType().Name}\",\"message\":\"{ex.Message.Replace("\"", "\\\"")}\",\"hresult\":\"0x{ex.HResult:X8}\",\"innerException\":\"{(ex.InnerException?.GetType().Name ?? "null")}\",\"stackTrace\":\"{ex.StackTrace?.Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "")}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"H3\"}}\n"); 
+                } catch { }
+                // #endregion
                 string errorMsg = $"Bootstrap initialization EXCEPTION: {ex.GetType().Name} - {ex.Message}";
                 LogDebug(errorMsg);
                 LogDebug($"Stack trace: {ex.StackTrace}");

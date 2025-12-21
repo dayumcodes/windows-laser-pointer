@@ -20,7 +20,7 @@ namespace LaserPointer
         private SystemTrayIcon? _trayIcon;
         private WindowMessageService? _windowMessageService;
 
-        // Static constructor runs before any instance is created
+        // Static constructor - initialize bootstrap here since Program.cs is excluded
         static App()
         {
             LogDebugStatic("=== App Static Constructor Started ===");
@@ -31,8 +31,15 @@ namespace LaserPointer
                 // Initialize Windows App SDK bootstrapper for unpackaged deployment
                 // Version 1.5 = 0x00010005
                 LogDebugStatic("Calling Bootstrap.TryInitialize(0x00010005)...");
+                // #region agent log
+                try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"App.xaml.cs:33\",\"message\":\"About to call Bootstrap.TryInitialize in App static constructor\",\"data\":{{\"version\":\"0x00010005\"}},\"sessionId\":\"debug-session\",\"runId\":\"run7\",\"hypothesisId\":\"H8\"}}\n"); } catch { }
+                // #endregion
+                
                 int hresult;
                 bool success = Bootstrap.TryInitialize(0x00010005, out hresult);
+                // #region agent log
+                try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"App.xaml.cs:36\",\"message\":\"Bootstrap.TryInitialize returned\",\"data\":{{\"success\":{success.ToString().ToLower()},\"hresult\":\"0x{hresult:X8}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run7\",\"hypothesisId\":\"H8\"}}\n"); } catch { }
+                // #endregion
                 
                 if (success)
                 {
@@ -75,6 +82,11 @@ namespace LaserPointer
             }
             catch (Exception ex)
             {
+                // #region agent log
+                try { 
+                    System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", $"{{\"id\":\"log_{DateTime.Now.Ticks}\",\"timestamp\":{DateTimeOffset.Now.ToUnixTimeMilliseconds()},\"location\":\"App.xaml.cs:88\",\"message\":\"SEHException caught in App static constructor\",\"data\":{{\"type\":\"{ex.GetType().Name}\",\"message\":\"{ex.Message.Replace("\"", "\\\"")}\",\"hresult\":\"0x{ex.HResult:X8}\",\"stackTrace\":\"{ex.StackTrace?.Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "")}\"}},\"sessionId\":\"debug-session\",\"runId\":\"run7\",\"hypothesisId\":\"H8\"}}\n"); 
+                } catch { }
+                // #endregion
                 string errorMsg = $"Bootstrap initialization EXCEPTION: {ex.GetType().Name} - {ex.Message}";
                 LogDebugStatic(errorMsg);
                 LogDebugStatic($"Stack trace: {ex.StackTrace}");
