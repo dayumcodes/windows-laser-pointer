@@ -68,7 +68,6 @@ namespace LaserPointer.Services
                 {
                     var hookStruct = Marshal.PtrToStructure<NativeMethods.MSLLHOOKSTRUCT>(lParam);
                     var point = new Point(hookStruct.pt.X, hookStruct.pt.Y);
-                    _isDrawing = true;
                     _lastPoint = point;
                     DrawingStart?.Invoke(this, point);
                 }
@@ -76,10 +75,9 @@ namespace LaserPointer.Services
                 {
                     var hookStruct = Marshal.PtrToStructure<NativeMethods.MSLLHOOKSTRUCT>(lParam);
                     var point = new Point(hookStruct.pt.X, hookStruct.pt.Y);
-                    _isDrawing = false;
                     DrawingEnd?.Invoke(this, point);
                 }
-                else if (wParam == (IntPtr)NativeMethods.WM_MOUSEMOVE && _isDrawing)
+                else if (wParam == (IntPtr)NativeMethods.WM_MOUSEMOVE)
                 {
                     var hookStruct = Marshal.PtrToStructure<NativeMethods.MSLLHOOKSTRUCT>(lParam);
                     var point = new Point(hookStruct.pt.X, hookStruct.pt.Y);

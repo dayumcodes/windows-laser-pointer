@@ -3,6 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml">
-    <canvas:CanvasControl x:Name="Canvas" Draw="Canvas_Draw" ClearColor="Transparent"/>
+    <canvas:CanvasSwapChainPanel x:Name="CanvasSwapChainPanel" SizeChanged="CanvasSwapChainPanel_SizeChanged"/>
 </UserControl>
 

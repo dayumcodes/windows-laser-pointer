@@ -179,13 +179,14 @@ namespace LaserPointer.Helpers
             NativeMethods.SetWindowLong(hwnd, GWL_STYLE, style);
         }
 
-        // H8: Update window transparency attributes based on background color
+        // H9: Update window transparency attributes for CanvasSwapChainPanel
+        // CanvasSwapChainPanel provides better transparency support than CanvasControl
         // For transparent backgrounds: use DwmExtendFrameIntoClientArea, DWM backdrop, and LWA_ALPHA for per-pixel alpha
         // For non-transparent backgrounds: ensure full opacity so background color shows
         public static void UpdateWindowTransparency(IntPtr hwnd, bool isTransparent)
         {
             // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Entry", data = new { hwnd = hwnd.ToInt64(), isTransparent = isTransparent }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Entry (with SwapChain)", data = new { hwnd = hwnd.ToInt64(), isTransparent = isTransparent }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
 
             if (hwnd == IntPtr.Zero || !NativeMethods.IsWindow(hwnd)) return;
@@ -205,7 +206,7 @@ namespace LaserPointer.Helpers
                     setResult = new IntPtr(NativeMethods.SetWindowLong32(hwnd, NativeMethods.GWL_EXSTYLE, (int)newExStyle.ToInt64()));
                 }
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Set WS_EX_LAYERED", data = new { setResult = setResult.ToInt64(), lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Set WS_EX_LAYERED", data = new { setResult = setResult.ToInt64(), lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
             }
 
@@ -222,30 +223,29 @@ namespace LaserPointer.Helpers
                 };
                 int dwmExtendResult = NativeMethods.DwmExtendFrameIntoClientArea(hwnd, ref margins);
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: DwmExtendFrameIntoClientArea", data = new { dwmExtendResult = dwmExtendResult, margins = margins, lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: DwmExtendFrameIntoClientArea (with SwapChain)", data = new { dwmExtendResult = dwmExtendResult, margins = margins, lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
 
                 // Set DWM backdrop to transparent
                 int backdropType = NativeMethods.DWM_SYSTEMBACKDROP_TYPE_NONE; // Transparent backdrop
                 int dwmResult = NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, sizeof(int));
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Set DWM backdrop to transparent", data = new { dwmResult = dwmResult, backdropType = backdropType, lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Set DWM backdrop to transparent (with SwapChain)", data = new { dwmResult = dwmResult, backdropType = backdropType, lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
 
                 // Disable DWM non-client area rendering for better transparency
                 int ncrPolicy = NativeMethods.DWMNCRP_DISABLED;
                 int dwmNcrResult = NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_NCRENDERING_POLICY, ref ncrPolicy, sizeof(int));
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Disable DWM non-client rendering", data = new { dwmNcrResult = dwmNcrResult, ncrPolicy = ncrPolicy, lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: Disable DWM non-client rendering (with SwapChain)", data = new { dwmNcrResult = dwmNcrResult, ncrPolicy = ncrPolicy, lastError = NativeMethods.GetLastError() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
 
-                // H8: Use LWA_ALPHA with alpha=255 to enable per-pixel alpha from XAML
-                // This allows transparent XAML content (alpha=0) to show through
-                // LWA_COLORKEY only works if pixels are exactly black, but compositor may render different default color
+                // H9: Use LWA_ALPHA with alpha=255 to enable per-pixel alpha from SwapChain
+                // CanvasSwapChainPanel renders with alpha channel, allowing transparent content (alpha=0) to show through
                 bool lwaAlphaResult = NativeMethods.SetLayeredWindowAttributes(hwnd, 0, 255, NativeMethods.LWA_ALPHA);
                 var errorAfterAlpha = NativeMethods.GetLastError();
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: SetLayeredWindowAttributes with LWA_ALPHA (per-pixel alpha)", data = new { success = lwaAlphaResult, alpha = 255, flags = "LWA_ALPHA", errorAfterAlpha = errorAfterAlpha }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: SetLayeredWindowAttributes with LWA_ALPHA (per-pixel alpha for SwapChain)", data = new { success = lwaAlphaResult, alpha = 255, flags = "LWA_ALPHA", errorAfterAlpha = errorAfterAlpha }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
             }
             else
@@ -254,7 +254,7 @@ namespace LaserPointer.Helpers
                 bool lwaResult = NativeMethods.SetLayeredWindowAttributes(hwnd, 0, 255, NativeMethods.LWA_ALPHA);
                 var errorAfterLWA = NativeMethods.GetLastError();
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: SetLayeredWindowAttributes with LWA_ALPHA", data = new { success = lwaResult, alpha = 255, flags = "LWA_ALPHA", isTransparent = isTransparent, errorAfterLWA = errorAfterLWA }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: SetLayeredWindowAttributes with LWA_ALPHA (non-transparent)", data = new { success = lwaResult, alpha = 255, flags = "LWA_ALPHA", isTransparent = isTransparent, errorAfterLWA = errorAfterLWA }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
             }
 
@@ -262,7 +262,7 @@ namespace LaserPointer.Helpers
             bool frameChanged = NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
                 NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_FRAMECHANGED);
             // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: SetWindowPos FRAMECHANGED", data = new { success = frameChanged, isTransparent = isTransparent }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "WindowHelper.cs:UpdateWindowTransparency", message = "UpdateWindowTransparency: SetWindowPos FRAMECHANGED (with SwapChain)", data = new { success = frameChanged, isTransparent = isTransparent }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
         }
     }

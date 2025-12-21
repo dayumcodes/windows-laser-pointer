@@ -21,6 +21,9 @@ namespace LaserPointer
         private SettingsService _settingsService;
         private GlobalMouseTracker? _mouseTracker;
         private RectInt32 _windowBounds;
+        private bool _isWindowVisible = false;
+
+        public new bool Visible => _isWindowVisible;
 
         public OverlayWindow(SettingsService settingsService)
         {
@@ -127,9 +130,7 @@ namespace LaserPointer
         private void InitializeMouseTracker()
         {
             _mouseTracker = new GlobalMouseTracker();
-            _mouseTracker.DrawingStart += OnDrawingStart;
             _mouseTracker.MouseMove += OnMouseMove;
-            _mouseTracker.DrawingEnd += OnDrawingEnd;
         }
 
         private void OnWindowActivated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -145,52 +146,71 @@ namespace LaserPointer
 
         public void Show()
         {
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:Show", message = "Show: Entry", data = new { currentIsVisible = _isWindowVisible, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             var hwnd = WindowNative.GetWindowHandle(this);
             NativeMethods.ShowWindow(hwnd, NativeMethods.SW_SHOW);
+            _isWindowVisible = true;
             _mouseTracker?.StartTracking();
+            
+            // Start continuous drawing at current cursor position
+            NativeMethods.POINT currentCursorPos;
+            NativeMethods.GetCursorPos(out currentCursorPos);
+            var windowPoint = ScreenToWindow(new Point(currentCursorPos.X, currentCursorPos.Y));
+            LaserCanvas.StartStroke(windowPoint, GetLaserColor(), GetLaserThickness(), GetFadeDuration());
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:Show", message = "Show: Started continuous drawing", data = new { initialWindowX = windowPoint.X, initialWindowY = windowPoint.Y, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
         }
 
         public void Hide()
         {
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:Hide", message = "Hide: Entry", data = new { currentIsVisible = _isWindowVisible, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             _mouseTracker?.StopTracking();
+            // Stop drawing and clear strokes when hiding the window
+            LaserCanvas.StopStroke();
+            _isWindowVisible = false;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:Hide", message = "Hide: Stopped drawing", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             var hwnd = WindowNative.GetWindowHandle(this);
             NativeMethods.ShowWindow(hwnd, NativeMethods.SW_HIDE);
-        }
-
-        private void OnDrawingStart(object? sender, Windows.Foundation.Point screenPoint)
-        {
-            // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "H", location = "OverlayWindow.xaml.cs:150", message = "OnDrawingStart: Mouse hook screen coordinates", data = new { screenX = screenPoint.X, screenY = screenPoint.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-            // #endregion
-            // Convert screen coordinates to window-relative coordinates
-            var windowPoint = ScreenToWindow(screenPoint);
-            // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "F", location = "OverlayWindow.xaml.cs:154", message = "OnDrawingStart: Final window coordinates sent to canvas", data = new { windowX = windowPoint.X, windowY = windowPoint.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-            // #endregion
-            
-            var settings = _settingsService.Settings;
-            var preset = ColorPreset.GetPresetByName(settings.ColorPreset);
-            var color = preset?.Color ?? Colors.Red;
-
-            LaserCanvas.StartStroke(windowPoint, color, settings.LineThickness, settings.FadeDurationSeconds);
         }
 
         private void OnMouseMove(object? sender, Windows.Foundation.Point screenPoint)
         {
             // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "H", location = "OverlayWindow.xaml.cs:165", message = "OnMouseMove: Mouse hook screen coordinates", data = new { screenX = screenPoint.X, screenY = screenPoint.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:OnMouseMove", message = "OnMouseMove: Mouse hook screen coordinates", data = new { screenX = screenPoint.X, screenY = screenPoint.Y, isVisible = _isWindowVisible }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
-            // Convert screen coordinates to window-relative coordinates
-            var windowPoint = ScreenToWindow(screenPoint);
-            // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "F", location = "OverlayWindow.xaml.cs:169", message = "OnMouseMove: Final window coordinates sent to canvas", data = new { windowX = windowPoint.X, windowY = windowPoint.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-            // #endregion
-            LaserCanvas.ContinueStroke(windowPoint);
+            // Draw continuously if the window is visible (hotkey activated)
+            if (LaserCanvas != null && _isWindowVisible)
+            {
+                var windowPoint = ScreenToWindow(screenPoint);
+                LaserCanvas.ContinueStroke(windowPoint);
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:OnMouseMove", message = "OnMouseMove: Final window coordinates sent to canvas (continuous)", data = new { windowX = windowPoint.X, windowY = windowPoint.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+            }
         }
 
-        private void OnDrawingEnd(object? sender, Windows.Foundation.Point screenPoint)
+        private Windows.UI.Color GetLaserColor()
         {
-            LaserCanvas.EndStroke();
+            var settings = _settingsService.Settings;
+            var preset = ColorPreset.GetPresetByName(settings.ColorPreset);
+            return preset?.Color ?? Colors.Red;
+        }
+
+        private float GetLaserThickness()
+        {
+            return _settingsService.Settings.LineThickness;
+        }
+
+        private double GetFadeDuration()
+        {
+            return _settingsService.Settings.FadeDurationSeconds;
         }
 
         private void OnSettingsChanged(object? sender, LaserSettings settings)
@@ -239,13 +259,13 @@ namespace LaserPointer
         private void ApplyWindowBackgroundColor()
         {
             // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H3_BackgroundColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Entry", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Entry", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
             var settings = _settingsService.Settings;
             var colorName = settings.WindowBackgroundColor ?? "Transparent";
             var color = GetColorFromName(colorName);
             // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H3_BackgroundColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Got color", data = new { colorName = colorName, colorA = color.A, colorR = color.R, colorG = color.G, colorB = color.B, hasContent = this.Content != null, hasLaserCanvas = LaserCanvas != null, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Got color", data = new { colorName = colorName, colorA = color.A, colorR = color.R, colorG = color.G, colorB = color.B, hasContent = this.Content != null, hasLaserCanvas = LaserCanvas != null, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
             
             // Set window background (WinUI 3 requires setting on multiple levels)
@@ -254,43 +274,40 @@ namespace LaserPointer
                 // Set on the root Grid (this is the Window's content, which controls the window background)
                 if (this.Content is Microsoft.UI.Xaml.Controls.Grid grid)
                 {
-                    var brushBefore = grid.Background;
-                    grid.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(color);
-                    var brushAfter = grid.Background;
+                    if (colorName == "Transparent")
+                    {
+                        grid.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                        LaserCanvas.WindowDrawBackgroundColor = Color.FromArgb(0, 0, 0, 0); // Pass transparent color to Win2D
+                    }
+                    else
+                    {
+                        grid.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(color);
+                        LaserCanvas.WindowDrawBackgroundColor = color; // Pass opaque color to Win2D
+                    }
                     // #region agent log
-                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H3_BackgroundColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Set Grid background", data = new { color = colorName, gridBackgroundSet = true, brushBeforeType = brushBefore?.GetType().Name, brushAfterType = brushAfter?.GetType().Name, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Set Grid and LaserCanvas background color for drawing", data = new { color = colorName, gridBackgroundSet = true, clearColor = LaserCanvas.WindowDrawBackgroundColor.ToString(), currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                     // #endregion
                 }
                 else
                 {
                     // #region agent log
-                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H3_BackgroundColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Content is not Grid", data = new { contentType = this.Content?.GetType().Name, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Content is not Grid", data = new { contentType = this.Content?.GetType().Name, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                     // #endregion
                 }
                 
-                // Also set the UserControl background
-                if (LaserCanvas != null)
-                {
-                    var canvasBrushBefore = LaserCanvas.Background;
-                    LaserCanvas.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(color);
-                    var canvasBrushAfter = LaserCanvas.Background;
-                    // #region agent log
-                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H3_BackgroundColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Set LaserCanvas background", data = new { color = colorName, canvasBrushBeforeType = canvasBrushBefore?.GetType().Name, canvasBrushAfterType = canvasBrushAfter?.GetType().Name, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-                    // #endregion
-                }
-                
-                // H8: Update window transparency attributes to ensure proper rendering
+                // H9: Update window transparency attributes for CanvasSwapChainPanel
+                // CanvasSwapChainPanel provides better transparency support than CanvasControl
                 // For transparent backgrounds: use DwmExtendFrameIntoClientArea, DWM backdrop, and LWA_ALPHA for per-pixel alpha
                 // For non-transparent backgrounds: ensure full opacity so background color shows
                 var hwnd = WindowNative.GetWindowHandle(this);
                 var isTransparent = colorName == "Transparent" || color.A == 0;
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run11", hypothesisId = "H8_Transparency", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Checking if transparency update needed", data = new { isTransparent = isTransparent, colorName = colorName, colorA = color.A, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Checking if transparency update needed (with SwapChain)", data = new { isTransparent = isTransparent, colorName = colorName, colorA = color.A, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
                 
                 // Update window transparency attributes
                 // This uses DwmExtendFrameIntoClientArea, DWM backdrop settings, and LWA_ALPHA
-                // to enable per-pixel alpha from XAML, allowing transparent content (alpha=0) to show through
+                // to enable per-pixel alpha from XAML/SwapChain, allowing transparent content (alpha=0) to show through
                 WindowHelper.UpdateWindowTransparency(hwnd, isTransparent);
                 
                 // Force window to update by invalidating layout on the Content element
@@ -299,21 +316,22 @@ namespace LaserPointer
                     contentElement.InvalidateArrange();
                     contentElement.InvalidateMeasure();
                     // #region agent log
-                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H3_BackgroundColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Invalidated layout on Content", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Invalidated layout on Content", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                     // #endregion
                 }
             }
             catch (Exception ex)
             {
                 // #region agent log
-                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H3_BackgroundColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Exception", data = new { error = ex.Message, stackTrace = ex.StackTrace, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H1_ClearColor", location = "OverlayWindow.xaml.cs:ApplyWindowBackgroundColor", message = "ApplyWindowBackgroundColor: Exception", data = new { error = ex.Message, stackTrace = ex.StackTrace, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
             }
         }
 
         private Windows.UI.Color GetColorFromName(string colorName)
         {
-            return colorName switch
+            // Microsoft.UI.Colors constants return Windows.UI.Color values
+            Windows.UI.Color color = colorName switch
             {
                 "Transparent" => Microsoft.UI.Colors.Transparent,
                 "Black" => Microsoft.UI.Colors.Black,
@@ -322,6 +340,7 @@ namespace LaserPointer
                 "LightGray" => Microsoft.UI.Colors.LightGray,
                 _ => Microsoft.UI.Colors.Transparent
             };
+            return color;
         }
     }
 }
