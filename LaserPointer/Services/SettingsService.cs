@@ -14,7 +14,17 @@ namespace LaserPointer.Services
 
         public event EventHandler<LaserSettings>? SettingsChanged;
 
-        public LaserSettings Settings => _settings ??= LoadSettings();
+        public LaserSettings Settings
+        {
+            get
+            {
+                var loaded = _settings ??= LoadSettings();
+                // #region agent log
+                try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run15", hypothesisId = "H6_ShowExecution", location = "SettingsService.cs:Settings.get", message = "Settings: Property accessed", data = new { colorPreset = loaded.ColorPreset, fadeDuration = loaded.FadeDurationSeconds, lineThickness = loaded.LineThickness, wasNull = _settings == null, settingsInstance = this.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+                return loaded;
+            }
+        }
 
         public SettingsService()
         {
@@ -75,10 +85,13 @@ namespace LaserPointer.Services
         public void UpdateSettings(LaserSettings newSettings)
         {
             // #region agent log
-            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "SettingsService.cs:UpdateSettings", message = "UpdateSettings: Called", data = new { serviceInstance = this.GetHashCode(), newWindowBackgroundColor = newSettings.WindowBackgroundColor, newColorPreset = newSettings.ColorPreset, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run15", hypothesisId = "H6_ShowExecution", location = "SettingsService.cs:UpdateSettings", message = "UpdateSettings: Called", data = new { serviceInstance = this.GetHashCode(), newWindowBackgroundColor = newSettings.WindowBackgroundColor, newColorPreset = newSettings.ColorPreset, newFadeDuration = newSettings.FadeDurationSeconds, newLineThickness = newSettings.LineThickness, oldColorPreset = _settings?.ColorPreset, oldFadeDuration = _settings?.FadeDurationSeconds, oldLineThickness = _settings?.LineThickness, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
 
             _settings = newSettings;
+            // #region agent log
+            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run15", hypothesisId = "H6_ShowExecution", location = "SettingsService.cs:UpdateSettings", message = "UpdateSettings: Assigned _settings", data = new { colorPreset = _settings.ColorPreset, fadeDuration = _settings.FadeDurationSeconds, lineThickness = _settings.LineThickness }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             SaveSettings();
 
             // #region agent log

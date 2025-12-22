@@ -161,6 +161,9 @@ namespace LaserPointer.Controls
 
         public void StartStroke(Point start, Color color, float thickness, double fadeDurationSeconds)
         {
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H2_ParameterPassing", location = "LaserCanvas.xaml.cs:StartStroke", message = "StartStroke: Received parameters", data = new { color = $"{color.A},{color.R},{color.G},{color.B}", thickness = thickness, fadeDuration = fadeDurationSeconds, startX = start.X, startY = start.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             _fadeDurationSeconds = fadeDurationSeconds;
             _currentStroke = new LaserStroke
             {
@@ -172,6 +175,9 @@ namespace LaserPointer.Controls
                 CreatedAt = DateTime.Now
             };
             _lastPoint = start;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H3_StrokeApplication", location = "LaserCanvas.xaml.cs:StartStroke", message = "StartStroke: Created _currentStroke", data = new { strokeColor = $"{_currentStroke.Color.A},{_currentStroke.Color.R},{_currentStroke.Color.G},{_currentStroke.Color.B}", strokeThickness = _currentStroke.Thickness, storedFadeDuration = _fadeDurationSeconds }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             Draw();
         }
 
@@ -179,6 +185,9 @@ namespace LaserPointer.Controls
         {
             if (_currentStroke != null && _lastPoint.HasValue)
             {
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "LaserCanvas.xaml.cs:ContinueStroke", message = "ContinueStroke: Using _currentStroke values", data = new { strokeColor = $"{_currentStroke.Color.A},{_currentStroke.Color.R},{_currentStroke.Color.G},{_currentStroke.Color.B}", strokeThickness = _currentStroke.Thickness, pointX = point.X, pointY = point.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
                 // Add segment from last point to current point
                 var newStroke = new LaserStroke
                 {
@@ -192,6 +201,12 @@ namespace LaserPointer.Controls
                 _activeStrokes.Add(newStroke);
                 _lastPoint = point;
                 Draw();
+            }
+            else
+            {
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "LaserCanvas.xaml.cs:ContinueStroke", message = "ContinueStroke: Skipped (no current stroke or last point)", data = new { hasCurrentStroke = _currentStroke != null, hasLastPoint = _lastPoint.HasValue }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
             }
         }
 
@@ -265,6 +280,9 @@ namespace LaserPointer.Controls
                     {
                         var color = stroke.Color;
                         color.A = (byte)(255 * stroke.Opacity);
+                        // #region agent log
+                        try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H3_StrokeApplication", location = "LaserCanvas.xaml.cs:Draw", message = "Draw: Drawing stroke segment", data = new { strokeColor = $"{color.A},{color.R},{color.G},{color.B}", strokeThickness = stroke.Thickness, strokeOpacity = stroke.Opacity }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                        // #endregion
 
                         session.DrawLine(
                             stroke.Start,
@@ -291,6 +309,27 @@ namespace LaserPointer.Controls
         public void SetFadeDuration(double seconds)
         {
             _fadeDurationSeconds = seconds;
+        }
+        
+        public void UpdateCurrentStroke(Color color, float thickness)
+        {
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "LaserCanvas.xaml.cs:UpdateCurrentStroke", message = "UpdateCurrentStroke: Called", data = new { hasCurrentStroke = _currentStroke != null, newColor = $"{color.A},{color.R},{color.G},{color.B}", newThickness = thickness }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            if (_currentStroke != null)
+            {
+                _currentStroke.Color = color;
+                _currentStroke.Thickness = thickness;
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "LaserCanvas.xaml.cs:UpdateCurrentStroke", message = "UpdateCurrentStroke: Updated _currentStroke", data = new { updatedColor = $"{_currentStroke.Color.A},{_currentStroke.Color.R},{_currentStroke.Color.G},{_currentStroke.Color.B}", updatedThickness = _currentStroke.Thickness }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+            }
+            else
+            {
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "LaserCanvas.xaml.cs:UpdateCurrentStroke", message = "UpdateCurrentStroke: No current stroke to update", data = new { }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+            }
         }
     }
 }

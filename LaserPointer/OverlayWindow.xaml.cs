@@ -147,7 +147,7 @@ namespace LaserPointer
         public void Show()
         {
             // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:Show", message = "Show: Entry", data = new { currentIsVisible = _isWindowVisible, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:Show", message = "Show: Entry", data = new { currentIsVisible = _isWindowVisible, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
             var hwnd = WindowNative.GetWindowHandle(this);
             NativeMethods.ShowWindow(hwnd, NativeMethods.SW_SHOW);
@@ -158,9 +158,51 @@ namespace LaserPointer
             NativeMethods.POINT currentCursorPos;
             NativeMethods.GetCursorPos(out currentCursorPos);
             var windowPoint = ScreenToWindow(new Point(currentCursorPos.X, currentCursorPos.Y));
-            LaserCanvas.StartStroke(windowPoint, GetLaserColor(), GetLaserThickness(), GetFadeDuration());
+            
+            // Get current settings - CRITICAL: Must retrieve settings here to use latest values
+            Windows.UI.Color color;
+            float thickness;
+            double fadeDuration;
+            
+            try
+            {
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:Show", message = "Show: About to retrieve settings", data = new { windowX = windowPoint.X, windowY = windowPoint.Y, settingsServiceInstance = _settingsService.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+                
+                color = GetLaserColor();
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:Show", message = "Show: Retrieved color", data = new { color = $"{color.A},{color.R},{color.G},{color.B}" }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+                
+                thickness = GetLaserThickness();
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:Show", message = "Show: Retrieved thickness", data = new { thickness = thickness }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+                
+                fadeDuration = GetFadeDuration();
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:Show", message = "Show: Retrieved fade duration", data = new { fadeDuration = fadeDuration }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+            }
+            catch (Exception ex)
+            {
+                // #region agent log
+                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:Show", message = "Show: Exception retrieving settings, using defaults", data = new { error = ex.Message, stackTrace = ex.StackTrace }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
+                // Fallback to default values if settings retrieval fails
+                color = Colors.Red;
+                thickness = 3.0f;
+                fadeDuration = 2.0;
+            }
+            
             // #region agent log
-            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run13", hypothesisId = "H2_ContinuousDrawing", location = "OverlayWindow.xaml.cs:Show", message = "Show: Started continuous drawing", data = new { initialWindowX = windowPoint.X, initialWindowY = windowPoint.Y, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H2_ParameterPassing", location = "OverlayWindow.xaml.cs:Show", message = "Show: About to call StartStroke with settings", data = new { color = $"{color.A},{color.R},{color.G},{color.B}", thickness = thickness, fadeDuration = fadeDuration, windowX = windowPoint.X, windowY = windowPoint.Y }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            
+            LaserCanvas.StartStroke(windowPoint, color, thickness, fadeDuration);
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H2_ParameterPassing", location = "OverlayWindow.xaml.cs:Show", message = "Show: Called StartStroke", data = new { initialWindowX = windowPoint.X, initialWindowY = windowPoint.Y, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
         }
 
@@ -198,19 +240,54 @@ namespace LaserPointer
 
         private Windows.UI.Color GetLaserColor()
         {
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetLaserColor", message = "GetLaserColor: Entry", data = new { }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             var settings = _settingsService.Settings;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetLaserColor", message = "GetLaserColor: Reading settings", data = new { colorPresetName = settings.ColorPreset, fadeDuration = settings.FadeDurationSeconds, lineThickness = settings.LineThickness, settingsInstance = _settingsService.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             var preset = ColorPreset.GetPresetByName(settings.ColorPreset);
-            return preset?.Color ?? Colors.Red;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetLaserColor", message = "GetLaserColor: Preset lookup result", data = new { presetName = preset?.Name, presetColor = preset != null ? $"{preset.Color.A},{preset.Color.R},{preset.Color.G},{preset.Color.B}" : "null", searchedName = settings.ColorPreset }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            var result = preset?.Color ?? Colors.Red;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetLaserColor", message = "GetLaserColor: Returning color", data = new { color = $"{result.A},{result.R},{result.G},{result.B}", isDefault = preset == null }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            return result;
         }
 
         private float GetLaserThickness()
         {
-            return _settingsService.Settings.LineThickness;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetLaserThickness", message = "GetLaserThickness: Entry", data = new { }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            var settings = _settingsService.Settings;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetLaserThickness", message = "GetLaserThickness: Reading settings", data = new { colorPreset = settings.ColorPreset, fadeDuration = settings.FadeDurationSeconds, lineThickness = settings.LineThickness, settingsInstance = _settingsService.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            var thickness = settings.LineThickness;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetLaserThickness", message = "GetLaserThickness: Returning thickness", data = new { thickness = thickness }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            return thickness;
         }
 
         private double GetFadeDuration()
         {
-            return _settingsService.Settings.FadeDurationSeconds;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetFadeDuration", message = "GetFadeDuration: Entry", data = new { }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            var settings = _settingsService.Settings;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetFadeDuration", message = "GetFadeDuration: Reading settings", data = new { colorPreset = settings.ColorPreset, fadeDuration = settings.FadeDurationSeconds, lineThickness = settings.LineThickness, settingsInstance = _settingsService.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            var fadeDuration = settings.FadeDurationSeconds;
+            // #region agent log
+            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run17", hypothesisId = "H1_SettingsRetrieval", location = "OverlayWindow.xaml.cs:GetFadeDuration", message = "GetFadeDuration: Returning fade duration", data = new { fadeDuration = fadeDuration }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+            return fadeDuration;
         }
 
         private void OnSettingsChanged(object? sender, LaserSettings settings)
@@ -230,19 +307,54 @@ namespace LaserPointer
                 dispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
                 {
                     // #region agent log
-                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: On UI thread, calling ApplyWindowBackgroundColor", data = new { windowBackgroundColor = settings.WindowBackgroundColor, uiThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H4", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: On UI thread, applying all settings", data = new { windowBackgroundColor = settings.WindowBackgroundColor, colorPreset = settings.ColorPreset, fadeDuration = settings.FadeDurationSeconds, lineThickness = settings.LineThickness, isWindowVisible = _isWindowVisible, hasLaserCanvas = LaserCanvas != null, uiThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                     // #endregion
                     try
                     {
+                        // Update window background color
                         ApplyWindowBackgroundColor();
+                        
+                        // Update laser canvas fade duration
+                        if (LaserCanvas != null)
+                        {
+                            LaserCanvas.SetFadeDuration(settings.FadeDurationSeconds);
+                            // #region agent log
+                            try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H4", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: Updated fade duration", data = new { fadeDuration = settings.FadeDurationSeconds, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                            // #endregion
+                            
+                            // If a stroke is currently active, update it with new color and thickness
+                            // This ensures new segments use the updated settings without restarting
+                            if (_isWindowVisible)
+                            {
+                                // #region agent log
+                                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: Window is visible, updating current stroke", data = new { isWindowVisible = _isWindowVisible, hasLaserCanvas = LaserCanvas != null }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                                // #endregion
+                                var newColor = GetLaserColor();
+                                var newThickness = GetLaserThickness();
+                                // #region agent log
+                                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: About to update current stroke", data = new { newColor = $"{newColor.A},{newColor.R},{newColor.G},{newColor.B}", newThickness = newThickness, isWindowVisible = _isWindowVisible }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                                // #endregion
+                                LaserCanvas.UpdateCurrentStroke(newColor, newThickness);
+                                // #region agent log
+                                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: Updated current stroke with new color and thickness", data = new { color = $"{newColor.A},{newColor.R},{newColor.G},{newColor.B}", thickness = newThickness, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                                // #endregion
+                            }
+                            else
+                            {
+                                // #region agent log
+                                try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run14", hypothesisId = "H5_ShowSettings", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: Window not visible, skipping stroke update", data = new { isWindowVisible = _isWindowVisible }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                                // #endregion
+                            }
+                        }
+                        
                         // #region agent log
-                        try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: ApplyWindowBackgroundColor completed", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                        try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: All settings applied", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                         // #endregion
                     }
                     catch (Exception ex)
                     {
                         // #region agent log
-                        try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: Exception in ApplyWindowBackgroundColor", data = new { error = ex.Message, stackTrace = ex.StackTrace, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                        try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: Exception applying settings", data = new { error = ex.Message, stackTrace = ex.StackTrace, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                         // #endregion
                     }
                 });
@@ -252,7 +364,29 @@ namespace LaserPointer
                 // #region agent log
                 try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: No DispatcherQueue, calling directly", data = new { currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
                 // #endregion
-                ApplyWindowBackgroundColor();
+                try
+                {
+                    // Update window background color
+                    ApplyWindowBackgroundColor();
+                    
+                    // Update laser canvas fade duration
+                    if (LaserCanvas != null)
+                    {
+                        LaserCanvas.SetFadeDuration(settings.FadeDurationSeconds);
+                        
+                        // If a stroke is currently active, update it with new color and thickness
+                        if (_isWindowVisible)
+                        {
+                            LaserCanvas.UpdateCurrentStroke(GetLaserColor(), GetLaserThickness());
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // #region agent log
+                    try { File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run7", hypothesisId = "H2_EventPropagation", location = "OverlayWindow.xaml.cs:OnSettingsChanged", message = "OnSettingsChanged: Exception applying settings (no dispatcher)", data = new { error = ex.Message, stackTrace = ex.StackTrace, currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                    // #endregion
+                }
             }
         }
 

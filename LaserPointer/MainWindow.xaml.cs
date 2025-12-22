@@ -104,7 +104,7 @@ namespace LaserPointer
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
             // #region agent log
-            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "A", location = "MainWindow.xaml.cs:ApplyButton_Click", message = "ApplyButton_Click: Button clicked", data = new { settingsServiceInstance = _settingsService.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H1", location = "MainWindow.xaml.cs:ApplyButton_Click", message = "ApplyButton_Click: Button clicked", data = new { selectedColorPreset = (ColorPresetComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString(), selectedWindowBg = (WindowBackgroundColorComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString(), fadeDurationValue = FadeDurationSlider.Value, lineThicknessValue = LineThicknessSlider.Value }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
             var settings = new LaserSettings
             {
@@ -116,12 +116,12 @@ namespace LaserPointer
                 WindowBackgroundColor = (WindowBackgroundColorComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Transparent"
             };
             // #region agent log
-            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "A", location = "MainWindow.xaml.cs:ApplyButton_Click", message = "ApplyButton_Click: Created settings object", data = new { colorPreset = settings.ColorPreset, windowBackgroundColor = settings.WindowBackgroundColor, fadeDuration = settings.FadeDurationSeconds, lineThickness = settings.LineThickness }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H1", location = "MainWindow.xaml.cs:ApplyButton_Click", message = "ApplyButton_Click: Created settings object", data = new { colorPreset = settings.ColorPreset, windowBackgroundColor = settings.WindowBackgroundColor, fadeDuration = settings.FadeDurationSeconds, lineThickness = settings.LineThickness }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
 
             _settingsService.UpdateSettings(settings);
             // #region agent log
-            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "A", location = "MainWindow.xaml.cs:ApplyButton_Click", message = "ApplyButton_Click: Called UpdateSettings", data = new { settingsServiceInstance = _settingsService.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run8", hypothesisId = "H1", location = "MainWindow.xaml.cs:ApplyButton_Click", message = "ApplyButton_Click: Called UpdateSettings", data = new { settingsServiceInstance = _settingsService.GetHashCode() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
             // #endregion
         }
 

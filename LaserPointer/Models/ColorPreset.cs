@@ -1,5 +1,7 @@
 using Windows.UI;
 using Microsoft.UI;
+using System;
+using System.Linq;
 
 namespace LaserPointer.Models
 {
@@ -24,11 +26,22 @@ namespace LaserPointer.Models
         public static ColorPreset? GetPresetByName(string name)
         {
             var presets = GetPresets();
+            // #region agent log
+            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run15", hypothesisId = "H6_ShowExecution", location = "ColorPreset.cs:GetPresetByName", message = "GetPresetByName: Searching for preset", data = new { searchedName = name, availablePresets = string.Join(",", presets.Select(p => p.Name)) }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             foreach (var preset in presets)
             {
                 if (preset.Name == name)
+                {
+                    // #region agent log
+                    try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run15", hypothesisId = "H6_ShowExecution", location = "ColorPreset.cs:GetPresetByName", message = "GetPresetByName: Found preset", data = new { foundName = preset.Name, color = $"{preset.Color.A},{preset.Color.R},{preset.Color.G},{preset.Color.B}" }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                    // #endregion
                     return preset;
+                }
             }
+            // #region agent log
+            try { System.IO.File.AppendAllText(@"c:\Users\mfuza\Downloads\laser pointer\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run15", hypothesisId = "H6_ShowExecution", location = "ColorPreset.cs:GetPresetByName", message = "GetPresetByName: Not found, returning default", data = new { searchedName = name, defaultName = presets[0].Name, defaultColor = $"{presets[0].Color.A},{presets[0].Color.R},{presets[0].Color.G},{presets[0].Color.B}" }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             return presets[0]; // Default to Red
         }
     }
