@@ -9,7 +9,7 @@
   <Identity
     Name="LaserPointer"
     Publisher="CN=LaserPointer"
-    Version="1.0.0.0" />
+    Version="1.0.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="LaserPointer" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
