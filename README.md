@@ -27,20 +27,10 @@ The settings window allows you to customize:
 
 ## Video Demo
 
-<!-- Option 1: If you upload a video to YouTube/Vimeo, use this format -->
-<!--
-[![Watch the demo video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
--->
+Video Demo:
+https://github.com/dayumcodes/windows-laser-pointer/blob/main/assets/videos/laserpointer.mp4
 
-<!-- Option 2: If you upload a video file to GitHub, use this format -->
-<!--
-https://user-images.githubusercontent.com/YOUR_USER_ID/YOUR_VIDEO_ID.mp4
--->
 
-<!-- Option 3: If you have a GIF demo, use this format -->
-<!--
-![Demo GIF](assets/videos/demo.gif)
--->
 
 **Note**: Replace the commented sections above with your actual video. You can:
 - Upload to YouTube and use the YouTube embed format
